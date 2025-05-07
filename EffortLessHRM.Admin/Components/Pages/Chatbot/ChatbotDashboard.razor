@@ -1,0 +1,271 @@
+﻿@page "/chatbot"
+@using EffortLessHRM.Admin.Models
+@using EffortLessHRM.Admin.Services
+@inject ChatbotSettingsService chatbotSettingsService
+@inject IJSRuntime JSRuntime
+
+@inject NavigationManager NavigationManager
+
+@* @code {
+	protected override void OnInitialized()
+	{
+		// Simple check, replace with proper auth
+		if (!IsLoggedIn)
+		{
+			NavigationManager.NavigateTo("/login");
+		}
+	}
+
+	private bool IsLoggedIn => true; // Replace with actual login check
+} *@
+
+<style>
+	.wide-modal {
+		max-width: 800px; /* Increased modal width */
+	}
+
+	.answer-input-group {
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: center;
+	}
+
+	.answer-type-select {
+		width: 120px; /* Fixed width for type dropdown */
+		flex: 0 0 120px;
+	}
+
+	.answer-content-textarea {
+		flex: 1; /* Fill remaining space */
+		min-width: 0; /* Prevent overflow */
+	}
+
+	.answer-remove-button {
+		width: 120px; /* Fixed width for remove button */
+		flex: 0 0 120px;
+	}
+</style>
+
+<PageTitle>Chatbot Dashboard</PageTitle>
+
+<h1>Chatbot Dashboard</h1>
+
+<div class="mb-3">
+	<button class="btn btn-primary" @onclick="OpenAddPopup">Add New Chat Data</button>
+</div>
+
+@if (chatbotSettings == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Sl No</th>
+				<th>Question</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var (chatbot, index) in chatbotSettings.Select((value, i) => (value, i)))
+			{
+				<tr>
+					<td>@((currentPage - 1) * pageSize + index + 1)</td>
+					<td>@chatbot.question</td>
+					<td>
+						<button class="btn btn-sm btn-primary" @onclick="() => OpenEditPopup(chatbot)">Edit</button>
+						<button class="btn btn-sm btn-danger" @onclick="() => DeleteChatbot(chatbot)">Delete</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<nav aria-label="Chatbot pagination">
+		<ul class="pagination justify-content-center">
+			<li class="page-item @(currentPage == 1 ? "disabled" : "")">
+				<button class="page-link" @onclick="() => ChangePage(currentPage - 1)">Previous</button>
+			</li>
+			@for (int i = 1; i <= totalPages; i++)
+			{
+				int page = i;
+				<li class="page-item @(currentPage == page ? "active" : "")">
+					<button class="page-link" @onclick="() => ChangePage(page)">@i</button>
+				</li>
+			}
+			<li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+				<button class="page-link" @onclick="() => ChangePage(currentPage + 1)">Next</button>
+			</li>
+		</ul>
+	</nav>
+}
+
+@if (showPopup)
+{
+	<div class="modal" tabindex="-1" style="display:block; background-color: rgba(0,0,0,0.5);">
+		<div class="modal-dialog wide-modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">@(isEditMode ? "Edit Chatbot Data" : "Add Chatbot Data")</h5>
+					<button type="button" class="btn-close" @onclick="ClosePopup"></button>
+				</div>
+				<div class="modal-body">
+					<EditForm Model="currentChatbot" OnValidSubmit="SaveChatbot">
+						<DataAnnotationsValidator />
+						<div class="mb-3">
+							<label class="form-label">Question</label>
+							<InputText class="form-control" @bind-Value="currentChatbot.question" />
+							<ValidationMessage For="@(() => currentChatbot.question)" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Answers</label>
+							<ValidationMessage For="@(() => currentChatbot.answer)" class="text-danger" />
+							@foreach (var answer in currentChatbot.answer)
+							{
+								<div class="input-group mb-2 answer-input-group">
+									<div class="me-2 answer-type-select">
+										<select class="form-select" @bind="answer.type">
+											<option value="text">Text</option>
+											<option value="image">Image</option>
+										</select>
+									</div>
+									<div class="me-2 answer-content-textarea">
+										<InputTextArea class="form-control" rows="4" @bind-Value="answer.content" />
+									</div>
+									<div class="answer-remove-button">
+										<button class="btn btn-danger" type="button" @onclick="() => RemoveAnswer(answer)">Remove</button>
+									</div>
+								</div>
+							}
+							<button class="btn btn-secondary btn-sm" type="button" @onclick="AddAnswer">Add Answer</button>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" @onclick="ClosePopup">Cancel</button>
+							<button type="submit" class="btn btn-primary">Save</button>
+						</div>
+					</EditForm>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	private List<ChatbotSettings> chatbotSettings = new();
+	private ChatbotSettings currentChatbot = new();
+	private bool showPopup = false;
+	private bool isEditMode = false;
+	private int currentPage = 1;
+	private int pageSize = 10;
+	private long totalItems = 0;
+	private int totalPages => (int)Math.Ceiling((double)totalItems / pageSize);
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadChatbotSettings();
+	}
+
+	private async Task LoadChatbotSettings()
+	{
+		try
+		{
+			var (settings, total) = await chatbotSettingsService.GetChatbotSettingsAsync(currentPage, pageSize);
+			chatbotSettings = settings;
+			totalItems = total;
+		}
+		catch (Exception ex)
+		{
+			await JSRuntime.InvokeVoidAsync("alert", $"Error loading settings: {ex.Message}");
+		}
+	}
+
+	private async Task ChangePage(int page)
+	{
+		if (page >= 1 && page <= totalPages)
+		{
+			currentPage = page;
+			await LoadChatbotSettings();
+		}
+	}
+
+	private void OpenAddPopup()
+	{
+		currentChatbot = new ChatbotSettings { answer = new List<ChatAnswer>() };
+		showPopup = true;
+		isEditMode = false;
+	}
+
+	private void OpenEditPopup(ChatbotSettings chatbot)
+	{
+		currentChatbot = new ChatbotSettings
+			{
+				Id = chatbot.Id,
+				question = chatbot.question,
+				answer = chatbot.answer.Select(a => new ChatAnswer { type = a.type, content = a.content }).ToList(),
+				createdOn = chatbot.createdOn,
+				updatedOn = chatbot.updatedOn,
+				active = chatbot.active
+			};
+		showPopup = true;
+		isEditMode = true;
+	}
+
+	private void ClosePopup()
+	{
+		showPopup = false;
+		currentChatbot = new ChatbotSettings();
+	}
+
+	private async Task SaveChatbot()
+	{
+		try
+		{
+			if (isEditMode)
+			{
+				currentChatbot.updatedOn = DateTime.UtcNow;
+				await chatbotSettingsService.UpdateChatbotSettingsAsync(currentChatbot.Id, currentChatbot);
+			}
+			else
+			{
+				currentChatbot.active = true;
+				currentChatbot.createdOn = DateTime.UtcNow;
+				currentChatbot.updatedOn = DateTime.UtcNow;
+				await chatbotSettingsService.CreateChatbotSettingsAsync(currentChatbot);
+			}
+			await LoadChatbotSettings();
+			ClosePopup();
+		}
+		catch (Exception ex)
+		{
+			await JSRuntime.InvokeVoidAsync("alert", $"Error saving settings: {ex.Message}");
+		}
+	}
+
+	private async Task DeleteChatbot(ChatbotSettings chatbot)
+	{
+		if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this chatbot setting?"))
+		{
+			try
+			{
+				await chatbotSettingsService.DeleteChatbotSettingsAsync(chatbot.Id);
+				await LoadChatbotSettings();
+			}
+			catch (Exception ex)
+			{
+				await JSRuntime.InvokeVoidAsync("alert", $"Error deleting settings: {ex.Message}");
+			}
+		}
+	}
+
+	private void AddAnswer()
+	{
+		currentChatbot.answer.Add(new ChatAnswer { type = "text", content = "" });
+	}
+
+	private void RemoveAnswer(ChatAnswer answer)
+	{
+		currentChatbot.answer.Remove(answer);
+	}
+}

@@ -1,0 +1,55 @@
+﻿@page "/login"
+@using EffortLessHRM.Admin.Components
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [AllowAnonymous]
+
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; display:none;">
+        <div class="card-body">
+            <h3 class="text-center mb-4 text-primary">Sign In</h3>
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input id="username" class="form-control" placeholder="Enter username" @bind="Username" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input id="password" class="form-control" type="password" placeholder="Enter password" @bind="Password" />
+            </div>
+
+            <div class="d-grid">
+                <button type="button" class="btn btn-primary" @onclick="HandleLogin">Login</button>
+            </div>
+
+            @if (LoginFailed)
+            {
+                <div class="alert alert-danger mt-3" role="alert">
+                    Invalid username or password.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Username;
+    private string Password;
+    private bool LoginFailed = false;
+
+    [Inject] NavigationManager Navigation { get; set; }
+
+    private void HandleLogin()
+    {
+        if (Username == "admin" && Password == "admin")
+        {
+            // After successful login, navigate to the home page
+            Navigation.NavigateTo("/home");
+        }
+        else
+        {
+            LoginFailed = true;
+        }
+    }
+}

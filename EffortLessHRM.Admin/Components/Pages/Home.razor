@@ -1,0 +1,19 @@
+﻿@page "/home"
+
+@* <h3>Welcome to Dashboard</h3> *@
+
+@* @inject NavigationManager NavigationManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Simple check, replace with proper auth
+        if (!IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+    private bool IsLoggedIn => true; // Replace with actual login check
+} *@
+<PageTitle>Welcome to Dashboard</PageTitle>
