@@ -1,0 +1,194 @@
+[
+    {
+        "PermissionName": "Dashboard",
+        "PermissionDetails": "Dashboard",
+        "Resource": "Dashboard Resource",
+        "Action": "Dashboard Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Screenshots",
+        "PermissionDetails": "Screenshots details",
+        "Resource": "Screenshots Resource",
+        "Action": "Screenshots Action",
+        "UiElement": "Ui element",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Realtime",
+        "PermissionDetails": "Realtime details ",
+        "Resource": "Realtime Resource",
+        "Action": "Realtime Action",
+        "UiElement": "ui",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Tasks",
+        "PermissionDetails": "tasks details",
+        "Resource": "tasks Resource",
+        "Action": "tasks Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Organizations",
+        "PermissionDetails": "",
+        "Resource": "Organization Resource",
+        "Action": "Organization Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Manage",
+        "PermissionDetails": "",
+        "Resource": "Manage Resource",
+        "Action": "manage Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Calender",
+        "PermissionDetails": "",
+        "Resource": "Attendance Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Attendance",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Timesheets",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Leave",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Expenses",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Alerts",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Payroll",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Taxation",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Reports",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "PaySlips",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Separation",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Manual Time",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Settings",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Approvals",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "_id": "682ad0bd0387320c70cbd25e",
+        "PermissionName": "Permissions",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Interview Process",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Feedback",
+        "PermissionDetails": "",
+        "Resource": "Resource",
+        "Action": "Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
+        "PermissionName": "Helpdesk",
+        "PermissionDetails": "permission details",
+        "Resource": "Resource ",
+        "Action": "Action",
+        "UiElement": ""
+    }
+]

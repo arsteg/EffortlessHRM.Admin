@@ -13,6 +13,7 @@ builder.Services.Configure<MongoDbSettings>(
 // Register MongoDbContext and UserSettingsService for dependency injection
 builder.Services.AddScoped<MongoDbContext>();
 builder.Services.AddScoped<ChatbotSettingsService>();
+builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<OpenAIEmbedding>();
 
 // Add services to the container.

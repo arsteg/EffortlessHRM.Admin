@@ -1,0 +1,236 @@
+﻿@page "/setupinitialappdata"
+@using EffortLessHRM.Admin.Models
+@using EffortLessHRM.Admin.Services
+@inject PermissionService PermissionService
+@inject IWebHostEnvironment Env
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Setup Initial effortlessHRM App Data</PageTitle>
+
+<h1>Setup Initial App Permission Data</h1>
+
+<div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-primary" @onclick="SetupInitialData" disabled="@IsProcessing">
+            @(IsProcessing ? "Processing..." : "Run Initial App Data")
+        </button>
+        <button class="btn btn-success" @onclick="ShowAddModal">Add Permission</button>
+    </div>
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+<!-- Bootstrap Modal -->
+<div class="modal fade @(ShowModal ? "show d-block" : "")" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@((IsEditing ? "Edit" : "Add") + " Permission")</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control mb-3" @bind="NewPermission.PermissionName" placeholder="Enter permission name" />
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                <button class="btn btn-primary" @onclick="SavePermission">@(IsEditing ? "Update" : "Add")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Permissions?.Count > 0)
+{
+    <h4>Permissions</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Permission Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var permission in Permissions)
+            {
+                <tr>
+                    <td>@permission.PermissionName</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => EditPermission(permission)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeletePermission(permission.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Permission> Permissions = new();
+    private Permission NewPermission = new();
+    private bool IsEditing = false;
+    private string? EditingId = null;
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+    private bool IsProcessing = false;
+
+    private bool ShowModal = false;
+
+    private void ShowAddModal()
+    {
+        ErrorMessage = null;
+        NewPermission = new Permission();
+        IsEditing = false;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        IsEditing = false;
+        NewPermission = new();
+        ErrorMessage = null;
+    }
+
+    private async Task SetupInitialData()
+    {
+        IsProcessing = true;
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            string filePath = Path.Combine(Env.WebRootPath, "InitialAppData", "permissions.json");
+            if (System.IO.File.Exists(filePath))
+            {
+                var json = await System.IO.File.ReadAllTextAsync(filePath);
+                var permissionsFromFile = System.Text.Json.JsonSerializer.Deserialize<List<Permission>>(json);
+
+                if (permissionsFromFile != null)
+                {
+                    foreach (var perm in permissionsFromFile)
+                    {
+                        var existing = await PermissionService.GetByNameAsync(perm.PermissionName);
+                        if (existing == null)
+                        {
+                            await PermissionService.CreateAsync(perm);
+                        }
+                        else
+                        {
+                            perm.Id = existing.Id;
+                            await PermissionService.UpdateAsync(perm.Id!, perm);
+                        }
+                    }
+
+                    Permissions = await PermissionService.GetAllAsync();
+                    SuccessMessage = "Initial data setup completed successfully.";
+                }
+                else
+                {
+                    ErrorMessage = "Failed to parse permission data from file.";
+                }
+            }
+            else
+            {
+                ErrorMessage = "Initial permission data file not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+
+    private async Task SavePermission()
+    {
+        ErrorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(NewPermission.PermissionName))
+        {
+            ErrorMessage = "Permission name is required.";
+            return;
+        }
+
+        try
+        {
+            var existing = await PermissionService.GetByNameAsync(NewPermission.PermissionName);
+
+            if (IsEditing)
+            {
+                if (existing != null && existing.Id != EditingId)
+                {
+                    ErrorMessage = "Another permission with the same name already exists.";
+                    return;
+                }
+
+                await PermissionService.UpdateAsync(EditingId!, NewPermission);
+                IsEditing = false;
+                EditingId = null;
+            }
+            else
+            {
+                if (existing != null)
+                {
+                    ErrorMessage = "Permission already exists.";
+                    return;
+                }
+
+                await PermissionService.CreateAsync(NewPermission);
+            }
+
+            NewPermission = new();
+            Permissions = await PermissionService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        ShowModal = false;
+    }
+
+    private void EditPermission(Permission permission)
+    {
+        NewPermission = new Permission
+            {
+                PermissionName = permission.PermissionName
+            };
+        IsEditing = true;
+        EditingId = permission.Id;
+        ShowModal = true;
+    }
+
+    private async Task DeletePermission(string id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this permission?");
+
+        if (confirmed)
+        {
+            await PermissionService.DeleteAsync(id);
+            Permissions = await PermissionService.GetAllAsync();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Permissions = await PermissionService.GetAllAsync();
+    }
+}

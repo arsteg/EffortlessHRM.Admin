@@ -18,5 +18,8 @@ namespace EffortLessHRM.Admin.Data
 
         public IMongoCollection<ChatbotSettings> ChatbotSettingsCollection =>
             _database.GetCollection<ChatbotSettings>("ChatbotData");
+
+        public IMongoCollection<Permission> PermissionCollection =>
+            _database.GetCollection<Permission>("Permission");
     }
 }
