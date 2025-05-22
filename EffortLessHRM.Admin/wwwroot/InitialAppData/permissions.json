@@ -190,5 +190,12 @@
         "Resource": "Resource ",
         "Action": "Action",
         "UiElement": ""
+    },
+    {
+        "PermissionName": "Profile",
+        "PermissionDetails": "profile",
+        "Resource": "profile",
+        "Action": "action",
+        "UiElement": ""
     }
 ]
