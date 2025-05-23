@@ -32,7 +32,7 @@
         "ParentPermission": null
     },
     {
-        "PermissionName": "Organizations",
+        "PermissionName": "Organization",
         "PermissionDetails": "",
         "Resource": "Organization Resource",
         "Action": "Organization Action",
