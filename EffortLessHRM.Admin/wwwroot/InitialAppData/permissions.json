@@ -1,5 +1,13 @@
 [
     {
+        "PermissionName": "Home",
+        "PermissionDetails": "Home",
+        "Resource": "Home Resource",
+        "Action": "Home Action",
+        "UiElement": "",
+        "ParentPermission": null
+    },
+    {
         "PermissionName": "Dashboard",
         "PermissionDetails": "Dashboard",
         "Resource": "Dashboard Resource",
@@ -48,7 +56,7 @@
         "ParentPermission": null
     },
     {
-        "PermissionName": "Calender",
+        "PermissionName": "Calendar",
         "PermissionDetails": "",
         "Resource": "Attendance Resource",
         "Action": "Action",
